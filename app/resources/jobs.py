@@ -141,6 +141,10 @@ class JobResource(Resource):
                 'message': f'Error updating job: {str(e)}'
             }, 500
 
+    def patch(self, job_id):
+        """Partially update a job"""
+        return self.put(job_id)  # Same logic as PUT for partial updates
+
     def delete(self, job_id):
         """Delete a job"""
         try:

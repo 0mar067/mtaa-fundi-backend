@@ -13,7 +13,7 @@ class UserListResource(Resource):
             schema = UserResponse
             return {
                 'success': True,
-                'data': [schema.model_validate(user) for user in users],
+                'data': [schema.from_orm(user) for user in users],
                 'count': len(users)
             }, 200
         except Exception as e:
@@ -44,11 +44,11 @@ class UserListResource(Resource):
             db.session.add(user)
             db.session.commit()
 
-            response_schema = UserResponse.model_validate(user)
+            response_schema = UserResponse.from_orm(user)
             return {
                 'success': True,
                 'message': 'User created successfully',
-                'data': response_schema.model_dump()
+                'data': response_schema.dict()
             }, 201
 
         except ValueError as e:
@@ -71,10 +71,10 @@ class UserResource(Resource):
         """Get a specific user"""
         try:
             user = User.query.get_or_404(user_id)
-            schema = UserResponse.model_validate(user)
+            schema = UserResponse.from_orm(user)
             return {
                 'success': True,
-                'data': schema.model_dump()
+                'data': schema.dict()
             }, 200
         except Exception as e:
             return {
@@ -98,17 +98,17 @@ class UserResource(Resource):
                     }, 409
 
             # Update user fields
-            update_data = schema.model_dump(exclude_unset=True)
+            update_data = schema.dict(exclude_unset=True)
             for key, value in update_data.items():
                 if hasattr(user, key):
                     setattr(user, key, value)
 
             db.session.commit()
-            response_schema = UserResponse.model_validate(user)
+            response_schema = UserResponse.from_orm(user)
             return {
                 'success': True,
                 'message': 'User updated successfully',
-                'data': response_schema.model_dump()
+                'data': response_schema.dict()
             }, 200
 
         except ValueError as e:

@@ -2,7 +2,6 @@ from flask import Flask
 from flask_migrate import Migrate
 from flask_restful import Api
 from flask_cors import CORS
-from app.models import db
 from config import config
 import json
 from datetime import datetime
@@ -18,6 +17,7 @@ def create_app(config_name='default'):
     app.config.from_object(config[config_name])
 
     # Initialize extensions
+    from app.models import db
     db.init_app(app)
     migrate = Migrate(app, db)
 
@@ -45,6 +45,9 @@ def create_app(config_name='default'):
         {**(headers or {}), 'Content-Type': 'application/json'}
     )
 
+    # Import models to ensure they are registered with SQLAlchemy
+    from app import models
+    
     # Import and register resources
     from app.resources.users import UserListResource, UserResource
     from app.resources.jobs import JobListResource, JobResource

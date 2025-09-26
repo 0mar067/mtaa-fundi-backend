@@ -3,11 +3,11 @@ from app import create_app
 from app.models import db
 
 # Create Flask application
-app = create_app(os.getenv('FLASK_ENV', 'development'))
+application = create_app(os.getenv('FLASK_ENV', 'development'))
 
 # Create database tables if they don't exist
-with app.app_context():
+with application.app_context():
     db.create_all()
 
 if __name__ == "__main__":
-    app.run()
+    application.run()

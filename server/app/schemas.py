@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional, List
-from pydantic import BaseModel, Field, validator, EmailStr
+from pydantic import BaseModel, Field, validator
 from enum import Enum
 
 class UserRole(str, Enum):
@@ -94,7 +94,7 @@ class UserResponse(UserBase):
     average_rating: Optional[float] = 0.0
 
     class Config:
-        from_attributes = True
+        orm_mode = True
         json_encoders = {
             datetime: lambda v: v.isoformat()
         }
@@ -107,7 +107,7 @@ class JobResponse(JobBase):
     quotes_count: Optional[int] = 0
 
     class Config:
-        from_attributes = True
+        orm_mode = True
         json_encoders = {
             datetime: lambda v: v.isoformat()
         }
@@ -119,7 +119,7 @@ class QuoteResponse(QuoteBase):
     fundi: Optional[UserResponse] = None
 
     class Config:
-        from_attributes = True
+        orm_mode = True
         json_encoders = {
             datetime: lambda v: v.isoformat()
         }
@@ -132,73 +132,7 @@ class ReviewResponse(ReviewBase):
     job: Optional[JobResponse] = None
 
     class Config:
-        from_attributes = True
+        orm_mode = True
         json_encoders = {
             datetime: lambda v: v.isoformat()
         }
-
-# Validation functions
-def validate_phone(phone: str) -> str:
-    """Validate Kenyan phone number format"""
-    if not phone.startswith('+254') and not phone.startswith('254') and not phone.startswith('0'):
-        raise ValueError('Phone number must be in Kenyan format (e.g., +2547XX XXX XXX or 07XX XXX XXX)')
-
-    # Basic length validation
-    clean_phone = phone.replace('+254', '').replace('254', '').replace('0', '')
-    if len(clean_phone) != 9:
-        raise ValueError('Phone number must have 9 digits after country/area code')
-
-    return phone
-
-def validate_budget(budget: float) -> float:
-    """Validate budget range"""
-    if budget < 100:
-        raise ValueError('Budget must be at least 100 KES')
-    if budget > 50000:
-        raise ValueError('Budget cannot exceed 50,000 KES')
-    return budget
-
-def validate_rating(rating: int) -> int:
-    """Validate rating range"""
-    if not isinstance(rating, int) or rating < 1 or rating > 5:
-        raise ValueError('Rating must be an integer between 1 and 5')
-    return rating
-
-def validate_price(price: float) -> float:
-    """Validate quote price"""
-    if price <= 0:
-        raise ValueError('Price must be greater than 0')
-    if price > 100000:
-        raise ValueError('Price cannot exceed 100,000 KES')
-    return price
-
-def validate_preferred_date(preferred_date: datetime) -> datetime:
-    """Validate that preferred date is not in the past"""
-    if preferred_date < datetime.utcnow():
-        raise ValueError('Preferred date cannot be in the past')
-    return preferred_date
-
-# Custom validators for Pydantic models
-@validator('phone')
-def validate_user_phone(cls, v):
-    return validate_phone(v)
-
-@validator('budget')
-def validate_job_budget(cls, v):
-    return validate_budget(v)
-
-@validator('preferred_date')
-def validate_job_date(cls, v):
-    return validate_preferred_date(v)
-
-@validator('category')
-def validate_job_category(cls, v):
-    return v.lower()
-
-@validator('price')
-def validate_quote_price(cls, v):
-    return validate_price(v)
-
-@validator('rating')
-def validate_review_rating(cls, v):
-    return validate_rating(v)

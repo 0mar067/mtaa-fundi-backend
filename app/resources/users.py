@@ -124,6 +124,10 @@ class UserResource(Resource):
                 'message': f'Error updating user: {str(e)}'
             }, 500
 
+    def patch(self, user_id):
+        """Partially update a user"""
+        return self.put(user_id)  # Same logic as PUT for partial updates
+
     def delete(self, user_id):
         """Delete a user"""
         try:
